@@ -3151,7 +3151,9 @@ def _windows_write_string(s, out):
         ret = WriteConsoleW(
             h, s, count if count else 2, ctypes.byref(written), None)
         if ret == 0:
-            raise OSError('Failed to write string')
+            # raise OSError('Failed to write string')
+            print('Failed to write string')
+            continue
         if not count:  # We just wrote a non-BMP character
             assert written.value == 2
             s = s[1:]
