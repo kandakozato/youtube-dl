@@ -1,6 +1,7 @@
 # coding: utf-8
 from __future__ import unicode_literals
 
+import time
 import itertools
 import json
 
@@ -124,10 +125,14 @@ class VLiveIE(VLiveBaseIE):
 
         post = self._call_api(
             'post/v1.0/officialVideoPost-%s', video_id,
-            'author{nickname},channel{channelCode,channelName},officialVideo{commentCount,exposeStatus,likeCount,playCount,playTime,status,title,type,vodId}')
+            'author{nickname},channel{channelCode,channelName},officialVideo{commentCount,exposeStatus,likeCount,playCount,playTime,status,title,type,vodId,createdAt}')
 
         video = post['officialVideo']
-
+        # print(video)
+        # exit(1)
+        # print(post)
+        # print(channel)
+        upload_time = time.strftime("%Y%m%d", time.localtime(video.get('createdAt')/1000))
         def get_common_fields():
             channel = post.get('channel') or {}
             return {
@@ -139,6 +144,7 @@ class VLiveIE(VLiveBaseIE):
                 'view_count': int_or_none(video.get('playCount')),
                 'like_count': int_or_none(video.get('likeCount')),
                 'comment_count': int_or_none(video.get('commentCount')),
+                'upload_date': upload_time,
             }
 
         video_type = video.get('type')
