@@ -125,18 +125,25 @@ class VLiveIE(VLiveBaseIE):
 
         post = self._call_api(
             'post/v1.0/officialVideoPost-%s', video_id,
-            'author{nickname},channel{channelCode,channelName},officialVideo{commentCount,exposeStatus,likeCount,playCount,playTime,status,title,type,vodId,createdAt}')
+            'author{nickname},channel{channelCode,channelName},officialVideo{commentCount,exposeStatus,likeCount,playCount,playTime,status,title,type,vodId}')
 
         video = post['officialVideo']
-        # print(video)
-        # exit(1)
-        # print(post)
-        # print(channel)
-        upload_time = time.strftime("%Y%m%d", time.localtime(video.get('createdAt')/1000))
+        
+        title = video.get('title')
+        
+        # Check if multinational titles are available, grab english title
+        multinational_titles = video.get('multinationalTitles')
+        if multinational_titles != []:
+            for multi_title in multinational_titles:
+                if multi_title['locale'] == 'en_US':
+                    title = multi_title['label']
+
+        # Get upload_time, using onAirStartAt instead of createdAt
+        upload_time = time.strftime("%Y%m%d", time.localtime(video.get('onAirStartAt')/1000))
         def get_common_fields():
             channel = post.get('channel') or {}
             return {
-                'title': video.get('title'),
+                'title': title,
                 'creator': post.get('author', {}).get('nickname'),
                 'channel': channel.get('channelName'),
                 'channel_id': channel.get('channelCode'),
